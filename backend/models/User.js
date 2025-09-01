@@ -3,10 +3,24 @@ const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema(
   {
-    fullName: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
+    fullName: { type: String, required: true, trim: true },
+    email: { type: String, required: true, unique: true, lowercase: true },
     phone: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    password: { type: String, required: true, minlength: 6 },
+
+    // Role handling: student (default), vendor (hotel/foodcourt), admin
+    role: {
+      type: String,
+      enum: ["student", "vendor", "admin"],
+      default: "student",
+    },
+
+    // Extra vendor info (only filled if role = vendor)
+    vendorProfile: {
+      hotelName: { type: String, trim: true },
+      foodcourtName: { type: String, trim: true },
+    },
+
     isVerified: { type: Boolean, default: false },
     otp: String,
     otpExpiry: Date,
