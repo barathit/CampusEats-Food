@@ -15,7 +15,7 @@ exports.signup = async (req, res) => {
 
     const otp = generateOtp();
     const otpExpiry = Date.now() + 10 * 60 * 1000;
-    console.log("otp", otp);
+
     const user = await User.create({
       fullName,
       email,
@@ -26,7 +26,7 @@ exports.signup = async (req, res) => {
     });
 
     await sendEmail(email, "Verify Your Email", `Your OTP is: ${otp}`);
-    console.log();
+
     res.status(201).json({ message: "User registered, OTP sent to email" });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -96,7 +96,13 @@ exports.login = async (req, res) => {
 
     const token = generateToken(user._id, user.email);
 
-    res.json({ message: "Login successful", token });
+    res.json({
+      message: "Login successful",
+      token,
+      role: user.role, // ✅ Added this
+      fullName: user.fullName,
+      email: user.email,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -119,7 +125,7 @@ exports.forgotPassword = async (req, res) => {
     await sendEmail(
       email,
       "Password Reset",
-      `Click here to reset: ${resetLink}`
+      `Click here to reset your password: ${resetLink}`
     );
 
     res.json({ message: "Password reset link sent to email" });
