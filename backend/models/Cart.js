@@ -23,7 +23,7 @@ const cartItemSchema = new mongoose.Schema(
     price: {
       type: Number,
       required: true,
-    }, // store snapshot price (prevents mismatch if vendor changes price later)
+    }, // store snapshot price (prevents mismatch if vendor changes price )
   },
   { _id: false }
 );
