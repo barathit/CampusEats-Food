@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { signup } from "../../api/authApi";
 import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import "../../styles/Signup.css";
 import logo from "../../assets/logo.png";
