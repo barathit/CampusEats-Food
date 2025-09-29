@@ -55,24 +55,25 @@ const Signup = () => {
     setErrors({ ...errors, [e.target.name]: "" }); // clear error on typing
   };
 
+  // After successful signup
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
-
     setLoading(true);
-
     try {
       const response = await signup(formData);
       toast.success(
         response.message || "✅ Signup successful! Please verify OTP."
       );
 
-      // Navigate to VerifyOtp page after a short delay
+      // Save role temporarily to localStorage
+      localStorage.setItem("signupRole", formData.role);
+      localStorage.setItem("signupEmail", formData.email);
+
       setTimeout(() => {
         navigate("/verify-otp", { state: { email: formData.email } });
       }, 1500);
