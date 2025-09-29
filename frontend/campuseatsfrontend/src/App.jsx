@@ -8,6 +8,9 @@ import Login from "./pages/auth/Login";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
 import Home from "./pages/Home";
+import SignupVendor from "./pages/auth/vendorsignup";
+import UserProfile from "./pages/UserProfile";
+import AdminDashboard from "./pages/AdminDashboard";
 
 function App() {
   return (
@@ -19,6 +22,9 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token?" element={<ResetPassword />} />
         <Route path="/home" element={<Home />} />
+        <Route path="/registervendor" element={<SignupVendor />} />
+        <Route path="/user-profile" element={<UserProfile />} />
+        <Route path="/admindashboard" element={<AdminDashboard />} />
       </Routes>
 
       {/* ✅ Global ToastContainer for all pages */}

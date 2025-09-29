@@ -53,7 +53,14 @@ const VerifyOtp = () => {
     setLoading(true);
     try {
       const response = await verifyOtp({ email, otp: otpValue });
+
       toast.success(response.message || "✅ OTP verified successfully!");
+
+      // Save info in localStorage (optional)
+      localStorage.setItem("fullName", response.fullName || "");
+      localStorage.setItem("email", response.email || email);
+
+      // ✅ Navigate to login for both user and vendor
       setTimeout(() => {
         navigate("/login");
       }, 1500);

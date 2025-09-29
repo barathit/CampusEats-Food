@@ -57,7 +57,14 @@ exports.verifyOtp = async (req, res) => {
     user.otpExpiry = null;
     await user.save();
 
-    res.json({ message: "Account verified successfully" });
+    // ✅ Generate JWT
+    const token = generateToken(user._id, user.email);
+
+    res.json({
+      message: "Account verified successfully",
+      token,
+      role: user.role, // pass role to frontend
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

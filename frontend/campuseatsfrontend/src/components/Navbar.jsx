@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Search,
   MapPin,
@@ -6,12 +6,18 @@ import {
   User,
   Menu,
   ChevronDown,
+  LogOut,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const Navbar = () => {
+  const navigate = useNavigate();
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userInfo, setUserInfo] = useState({ name: "", role: "" });
 
   const locations = [
     "Main Gate",
@@ -20,6 +26,41 @@ const Navbar = () => {
     "Cafeteria",
     "Sports Complex",
   ];
+
+  // Check login status on component mount
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+    const fullName = localStorage.getItem("fullName");
+
+    if (token) {
+      setIsLoggedIn(true);
+      setUserInfo({ name: fullName || "User", role: role || "" });
+    }
+  }, []);
+
+  const handleProfileClick = () => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    if (!token || role !== "student") {
+      alert("You must be logged in as a student to view your profile.");
+      return;
+    }
+    navigate("/user-profile");
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("fullName");
+    setIsLoggedIn(false);
+    navigate("/login");
+  };
+
+  const handleLoginClick = () => {
+    navigate("/login");
+  };
 
   return (
     <>
@@ -37,7 +78,7 @@ const Navbar = () => {
             <div className="col-xl-3 col-lg-4 col-md-6 col-sm-8 col-8 d-flex align-items-center">
               <a
                 className="navbar-brand fw-bold me-4 text-decoration-none"
-                href="/"
+                href="/home"
                 style={{
                   fontSize: "1.75rem",
                   background: "linear-gradient(45deg, #ff6b35, #f7931e)",
@@ -116,7 +157,7 @@ const Navbar = () => {
                     boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
                     border: "2px solid transparent",
                     transition: "all 0.3s ease",
-                    marginLeft: "50px", // <-- Added gap from location
+                    marginLeft: "50px",
                   }}
                   onFocus={(e) => {
                     e.currentTarget.style.borderColor = "#ff6b35";
@@ -242,29 +283,131 @@ const Navbar = () => {
                   Cart
                 </button>
 
-                <button
-                  className="btn text-white fw-medium d-flex align-items-center rounded-pill border-0"
-                  style={{
-                    background: "linear-gradient(45deg, #ff6b35, #f7931e)",
-                    padding: "10px 20px",
-                    fontSize: "14px",
-                    boxShadow: "0 4px 15px rgba(255,107,53,0.3)",
-                    transition: "all 0.3s ease",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.transform = "translateY(-2px)";
-                    e.target.style.boxShadow =
-                      "0 6px 20px rgba(255,107,53,0.4)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.transform = "translateY(0)";
-                    e.target.style.boxShadow =
-                      "0 4px 15px rgba(255,107,53,0.3)";
-                  }}
-                >
-                  <User size={16} className="me-2" />
-                  Login
-                </button>
+                {/* Profile Button or Login Button */}
+                {isLoggedIn ? (
+                  <div className="position-relative">
+                    <button
+                      onClick={() => setIsProfileOpen(!isProfileOpen)}
+                      className="btn p-0 border-0 rounded-circle"
+                      style={{
+                        width: "45px",
+                        height: "45px",
+                        overflow: "hidden",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                        transition: "all 0.3s ease",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.transform = "scale(1.05)";
+                        e.target.style.boxShadow =
+                          "0 4px 12px rgba(255,107,53,0.3)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.transform = "scale(1)";
+                        e.target.style.boxShadow = "0 2px 8px rgba(0,0,0,0.15)";
+                      }}
+                      title="User Profile"
+                    >
+                      <img
+                        src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+                          userInfo.name
+                        )}&background=ff6b35&color=fff&size=45`}
+                        alt="Profile"
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
+                    </button>
+
+                    {/* Profile Dropdown */}
+                    {isProfileOpen && (
+                      <div
+                        className="dropdown-menu show position-absolute mt-2 border-0 rounded-3 end-0"
+                        style={{
+                          boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
+                          minWidth: "220px",
+                          zIndex: 1000,
+                          animation: "fadeIn 0.2s ease-in-out",
+                        }}
+                      >
+                        <div className="px-3 py-3 border-bottom">
+                          <div
+                            className="fw-bold text-dark"
+                            style={{ fontSize: "15px" }}
+                          >
+                            {userInfo.name}
+                          </div>
+                          <div
+                            className="text-muted"
+                            style={{ fontSize: "12px" }}
+                          >
+                            {userInfo.role}
+                          </div>
+                        </div>
+                        <button
+                          onClick={handleProfileClick}
+                          className="dropdown-item py-2 px-3 border-0 d-flex align-items-center"
+                          style={{
+                            fontSize: "14px",
+                            transition: "background-color 0.2s ease",
+                          }}
+                          onMouseEnter={(e) =>
+                            (e.target.style.backgroundColor = "#fff3e0")
+                          }
+                          onMouseLeave={(e) =>
+                            (e.target.style.backgroundColor = "transparent")
+                          }
+                        >
+                          <User size={16} className="me-2 text-primary" />
+                          View Profile
+                        </button>
+                        <button
+                          onClick={handleLogout}
+                          className="dropdown-item py-2 px-3 border-0 d-flex align-items-center text-danger"
+                          style={{
+                            fontSize: "14px",
+                            transition: "background-color 0.2s ease",
+                          }}
+                          onMouseEnter={(e) =>
+                            (e.target.style.backgroundColor = "#ffe6e6")
+                          }
+                          onMouseLeave={(e) =>
+                            (e.target.style.backgroundColor = "transparent")
+                          }
+                        >
+                          <LogOut size={16} className="me-2" />
+                          Logout
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleLoginClick}
+                    className="btn text-white fw-medium d-flex align-items-center rounded-pill border-0"
+                    style={{
+                      background: "linear-gradient(45deg, #ff6b35, #f7931e)",
+                      padding: "10px 20px",
+                      fontSize: "14px",
+                      boxShadow: "0 4px 15px rgba(255,107,53,0.3)",
+                      transition: "all 0.3s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.transform = "translateY(-2px)";
+                      e.target.style.boxShadow =
+                        "0 6px 20px rgba(255,107,53,0.4)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.transform = "translateY(0)";
+                      e.target.style.boxShadow =
+                        "0 4px 15px rgba(255,107,53,0.3)";
+                    }}
+                  >
+                    <User size={16} className="me-2" />
+                    Login
+                  </button>
+                )}
               </div>
             </div>
 
@@ -318,6 +461,28 @@ const Navbar = () => {
             }}
           >
             <div className="container-xl px-3 py-3">
+              {/* User Info - Mobile */}
+              {isLoggedIn && (
+                <div className="mb-3 p-3 bg-white rounded-3 d-flex align-items-center">
+                  <img
+                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      userInfo.name
+                    )}&background=ff6b35&color=fff&size=40`}
+                    alt="Profile"
+                    className="rounded-circle me-3"
+                    style={{ width: "40px", height: "40px" }}
+                  />
+                  <div>
+                    <div className="fw-bold" style={{ fontSize: "14px" }}>
+                      {userInfo.name}
+                    </div>
+                    <div className="text-muted" style={{ fontSize: "12px" }}>
+                      {userInfo.role}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="mb-3 p-3 bg-white rounded-3">
                 <div className="d-flex align-items-center text-muted">
                   <MapPin size={16} className="me-2 text-danger" />
@@ -364,18 +529,49 @@ const Navbar = () => {
                   <ShoppingCart size={16} className="me-2" />
                   Cart
                 </a>
+
+                {isLoggedIn && (
+                  <>
+                    <button
+                      onClick={handleProfileClick}
+                      className="d-block p-3 mb-2 text-decoration-none bg-white rounded-3 d-flex align-items-center w-100 border-0 text-start"
+                      style={{
+                        color: "#333",
+                        fontSize: "15px",
+                        fontWeight: "500",
+                      }}
+                    >
+                      <User size={16} className="me-2" />
+                      View Profile
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      className="d-block p-3 mb-2 text-decoration-none bg-white rounded-3 d-flex align-items-center w-100 border-0 text-start text-danger"
+                      style={{
+                        fontSize: "15px",
+                        fontWeight: "500",
+                      }}
+                    >
+                      <LogOut size={16} className="me-2" />
+                      Logout
+                    </button>
+                  </>
+                )}
               </div>
 
-              <button
-                className="btn text-white fw-medium w-100 rounded-3 py-3"
-                style={{
-                  background: "linear-gradient(45deg, #ff6b35, #f7931e)",
-                  fontSize: "15px",
-                  boxShadow: "0 4px 15px rgba(255,107,53,0.3)",
-                }}
-              >
-                Login / Sign Up
-              </button>
+              {!isLoggedIn && (
+                <button
+                  onClick={handleLoginClick}
+                  className="btn text-white fw-medium w-100 rounded-3 py-3"
+                  style={{
+                    background: "linear-gradient(45deg, #ff6b35, #f7931e)",
+                    fontSize: "15px",
+                    boxShadow: "0 4px 15px rgba(255,107,53,0.3)",
+                  }}
+                >
+                  Login / Sign Up
+                </button>
+              )}
             </div>
           </div>
         )}
