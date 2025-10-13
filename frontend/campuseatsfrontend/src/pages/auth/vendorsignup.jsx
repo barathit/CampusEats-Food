@@ -62,7 +62,7 @@ const SignupVendor = () => {
       const response = await registerVendor(payload, token);
       setMessage(response.message);
 
-      setTimeout(() => navigate("/dashboard"), 1500);
+      setTimeout(() => navigate("/admindashboard"), 1500);
     } catch (err) {
       setError(err.response?.data?.message || "Something went wrong!");
     } finally {

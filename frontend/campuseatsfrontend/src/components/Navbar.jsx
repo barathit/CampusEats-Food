@@ -498,7 +498,7 @@ const Navbar = () => {
                   <a
                     key={index}
                     className="d-block p-3 mb-2 text-decoration-none bg-white rounded-3"
-                    href="#"
+                    href="/campuseatsmenu"
                     style={{
                       color: "#333",
                       fontSize: "15px",
