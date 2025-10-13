@@ -7,7 +7,7 @@ const crypto = require("crypto");
 // 📌 Signup
 exports.signup = async (req, res) => {
   try {
-    const { fullName, email, phone, password } = req.body;
+    const { fullName, email, phone, password, role } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser)
@@ -16,18 +16,25 @@ exports.signup = async (req, res) => {
     const otp = generateOtp();
     const otpExpiry = Date.now() + 10 * 60 * 1000;
 
+    // ✅ Validate role
+    const allowedRoles = ["student", "vendor", "admin"];
+    const userRole = allowedRoles.includes(role) ? role : "student"; // default to student
+
     const user = await User.create({
       fullName,
       email,
       phone,
       password,
+      role: userRole, // set role here
       otp,
       otpExpiry,
     });
 
     await sendEmail(email, "Verify Your Email", `Your OTP is: ${otp}`);
 
-    res.status(201).json({ message: "User registered, OTP sent to email" });
+    res
+      .status(201)
+      .json({ message: "User registered, OTP sent to email", role: userRole });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -50,7 +57,14 @@ exports.verifyOtp = async (req, res) => {
     user.otpExpiry = null;
     await user.save();
 
-    res.json({ message: "Account verified successfully" });
+    // ✅ Generate JWT
+    const token = generateToken(user._id, user.email);
+
+    res.json({
+      message: "Account verified successfully",
+      token,
+      role: user.role, // pass role to frontend
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
